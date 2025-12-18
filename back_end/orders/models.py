@@ -4,7 +4,7 @@ from accounts.models import User
 # Address
 
 class Address(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addreses')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
 
     full_name = models.CharField(max_length=100)
     mobile = models.CharField(max_length=15)
@@ -16,6 +16,10 @@ class Address(models.Model):
 
     def __str__(self):
         return f"{self.full_name} - {self.city}"
+    
+    class Meta:
+        verbose_name = 'Address'
+        verbose_name_plural = 'Addresses'
     
 # Order
 
