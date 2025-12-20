@@ -1,10 +1,10 @@
 from django.db import models
-from accounts.models import User
+from accounts.models import Register
 
 # Address
 
 class Address(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
+    user = models.ForeignKey(Register, on_delete=models.CASCADE, related_name='addresses')
 
     full_name = models.CharField(max_length=100)
     mobile = models.CharField(max_length=15)
@@ -31,7 +31,7 @@ class Order(models.Model):
         ('Cancelled', 'Cancelled'),
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    user = models.ForeignKey(Register, on_delete=models.CASCADE, related_name='orders')
     address = models.ForeignKey(Address, on_delete=models.PROTECT)
 
     subtotal = models.DecimalField(max_digits=10, decimal_places=2)
