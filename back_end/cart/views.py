@@ -6,7 +6,7 @@ from .models import Cart, CartItem
 from .serializers import CartSerializer, CartItemSerializer
 from products.models import Product
 
-# Get user's cart
+
 class GetCartView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -15,7 +15,7 @@ class GetCartView(APIView):
         serializer = CartSerializer(cart)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-# Add item to cart
+
 class AddToCartView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -63,7 +63,7 @@ class AddToCartView(APIView):
             status=status.HTTP_200_OK
         )
 
-# Update cart item quantity
+
 class UpdateCartItemView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -101,7 +101,7 @@ class UpdateCartItemView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-# Remove item from cart
+
 class RemoveFromCartView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -153,7 +153,7 @@ class ClearCartView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-# Get cart item count
+
 class CartCountView(APIView):
     permission_classes = [IsAuthenticated]
 
