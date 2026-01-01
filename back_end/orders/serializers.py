@@ -8,24 +8,40 @@ class AddressSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    class Meta :
+    product_name = serializers.CharField(source='product.name', read_only=True)
+    product_image = serializers.CharField(source='product.image', read_only=True)
+    
+    class Meta:
         model = OrderItem
-        fields = ['products','price','quantity']
+        fields = ['id', 'product', 'product_name', 'product_image', 'price', 'quantity']
 
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many = True)
-    class Meta :
+    items = OrderItemSerializer(many=True, read_only=True)
+    address_details = AddressSerializer(source='address', read_only=True)
+    
+    class Meta:
         model = Order
-        fields = ['id', 'address', 'subtotal', 'tax', 'delivery', 'total', 'status', 'placed_at', 'items']
+        fields = ['id', 'address', 'address_details', 'subtotal', 'tax', 'delivery', 'total', 'status', 'placed_at', 'items']
         read_only_fields = ['id', 'user', 'status', 'placed_at']
 
+class CreateOrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True)
+    
+    class Meta:
+        model = Order
+        fields = ['address', 'subtotal', 'tax', 'delivery', 'total', 'items']
+    
     def create(self, validated_data):
         items_data = validated_data.pop('items')
-        order = Order.objects.create(**validated_data)
+        request = self.context.get('request')
+        
+        order = Order.objects.create(
+            user=request.user,
+            status='Confirmed',
+            **validated_data
+        )
         
         for item_data in items_data:
             OrderItem.objects.create(order=order, **item_data)
         
         return order
-
-            

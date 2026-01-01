@@ -1,37 +1,32 @@
-from django.shortcuts import render
-from rest_framework import generics, status
-from rest_framework.response import Response
-from .models import Register
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from .serializers import RegisterSerializer, UserSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
-# Create your views here.
+from .serializers import RegisterSerializer, UserSerializer
 
-# Registration
-class RegisterView(generics.CreateAPIView):
-    queryset = Register.objects.all()
-    permission_classes = (AllowAny, )
-    serializer_class = RegisterSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        
-        # JWT creation 
-        refresh = RefreshToken.for_user(user)
-        
-        return Response({
-            'user': UserSerializer(user).data,
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-        }, status=status.HTTP_201_CREATED)
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
     
-# Login
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                "message": "Registration successful! Please login to continue.",
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "first_name": user.first_name,
+                    "last_name": user.last_name
+                }
+            }, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class LoginView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [AllowAny]
     
     def post(self, request):
         email = request.data.get('email')
@@ -39,29 +34,45 @@ class LoginView(APIView):
         
         if not email or not password:
             return Response(
-                {'error': 'Please provide both email and password'},
+                {"error": "Please provide both email and password"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
         
+        # Authenticate user
         user = authenticate(request, email=email, password=password)
         
         if user is not None:
+            # Generate JWT tokens
             refresh = RefreshToken.for_user(user)
+            
             return Response({
-                'user': UserSerializer(user).data,
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
+                "message": "Login successful",
+                "user": UserSerializer(user).data,
+                "tokens": {
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token)
+                }
             }, status=status.HTTP_200_OK)
         else:
             return Response(
-                {'error': 'Invalid credentials'},
+                {"error": "Invalid email or password"}, 
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
-# User Profile
-class ProfileView(generics.RetrieveUpdateAPIView):
-    permission_classes = (IsAuthenticated,)
-    serializer_class = UserSerializer
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
     
-    def get_object(self):
-        return self.request.user
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    def put(self, request):
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "Profile updated successfully",
+                "user": serializer.data
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
