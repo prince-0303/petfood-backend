@@ -4,7 +4,7 @@ from .views import PlaceOrderView, UserOrderView, OrderDetailView, AddressListCr
 
 urlpatterns = [
 
-    path('placeorder/', PlaceOrderView.as_view()),
+    path('placeorder/', PlaceOrderView.as_view(), name="placeorder"),
     path('orderlist/', UserOrderView.as_view()),
     path('order/<int:order_id>/', OrderDetailView.as_view()),
     

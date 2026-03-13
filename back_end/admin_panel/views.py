@@ -9,8 +9,6 @@ from products.models import Product
 from orders.models import Order
 
 
-# ==================== DASHBOARD ====================
-
 class DashboardView(APIView):
     permission_classes = [IsAdminUser]
     
@@ -31,8 +29,6 @@ class DashboardView(APIView):
         serializer = DashboardStatsSerializer(stats)
         return Response(serializer.data)
 
-
-# ==================== USER MANAGEMENT ====================
 
 class UserManagementView(APIView):
     permission_classes = [IsAdminUser]
@@ -102,8 +98,6 @@ class UserManagementView(APIView):
             return Response({"error": str(e)}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-# ==================== PRODUCT MANAGEMENT ====================
 
 class ProductManagementView(APIView):
     permission_classes = [IsAdminUser]
@@ -185,7 +179,6 @@ class ProductManagementView(APIView):
         product.delete()
         return Response({"message": "Product deleted successfully"})
 
-# ==================== ORDER MANAGEMENT ====================
 
 class OrderManagementView(APIView):
     permission_classes = [IsAdminUser]

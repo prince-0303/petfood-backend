@@ -1,9 +1,15 @@
 from rest_framework import serializers
 from .models import Cart, CartItem
+from products.models import Product
 from products.serializers import ProductSerializer
 
+class CartProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('id', 'name', 'price', 'image_url')
+
 class CartItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)
+    product = CartProductSerializer(read_only=True)
     product_id = serializers.IntegerField(write_only=True)
     subtotal = serializers.SerializerMethodField()
     
